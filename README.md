@@ -192,4 +192,5 @@ MIT License - Free to use and modify
 - [RFC 6962 - Certificate Transparency](https://tools.ietf.org/html/rfc6962)
 - [Mozilla WebExtensions API](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions)
 - [Certificate Transparency Overview](https://certificate.transparency.dev/)
-"# dp" 
+- [certificate-transparency](https://github.com/google/certificate-transparency)
+

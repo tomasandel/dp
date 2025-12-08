@@ -65,7 +65,7 @@ function displayCertificateData(data) {
   // Security information section
   html += `
     <div class="info-section">
-      <h2>🔐 Security Information</h2>
+      <h2>Security Information</h2>
       <div class="content">
         <div class="info-row">
           <span class="label">Security State:</span>
@@ -89,18 +89,53 @@ function displayCertificateData(data) {
     </div>
   `;
 
+  // SCT Verification section
+  if (data.sctVerification) {
+    const { total, verified, failed, verificationTimeMs } = data.sctVerification;
+
+    html += `
+      <div class="info-section">
+        <h2>SCT Verification Results</h2>
+        <div class="content">
+          <div class="info-row">
+            <span class="label">Total SCTs:</span>
+            <span class="value">${total}</span>
+          </div>
+          <div class="info-row">
+            <span class="label">Verified:</span>
+            <span class="value" style="color: green; font-weight: bold;">${verified}</span>
+          </div>
+          ${failed > 0 ? `
+          <div class="info-row">
+            <span class="label">Failed:</span>
+            <span class="value" style="color: red; font-weight: bold;">${failed}</span>
+          </div>
+          ` : ''}
+          <div class="info-row">
+            <span class="label">Verification Time:</span>
+            <span class="value">${verificationTimeMs}ms</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // SCT section
   html += `
     <div class="info-section">
-      <h2>📋 Signed Certificate Timestamps (${data.scts.length})</h2>
+      <h2>Signed Certificate Timestamps (${data.scts.length})</h2>
       <div class="content">
   `;
 
   if (data.scts.length > 0) {
     data.scts.forEach((sct, index) => {
+      // Find verification result for this SCT
+      const verificationResult = data.sctVerification?.results?.find(r => r.sct === sct);
+      const verifiedStatus = verificationResult?.verified ? ' [VERIFIED]' : verificationResult?.verified === false ? ' [FAILED]' : '';
+
       html += `
         <div class="sct-item" id="sct-${index}">
-          <h3>SCT #${index + 1}</h3>
+          <h3>SCT #${index + 1}${verifiedStatus}</h3>
           ${sct.logOperator ? `
           <div class="info-row">
             <span class="label">Log Operator:</span>
@@ -122,7 +157,7 @@ function displayCertificateData(data) {
           ${sct.logState ? `
           <div class="info-row">
             <span class="label">Log State:</span>
-            <span class="value">${escapeHtml(sct.logState)}</span>
+            <span class="value">${getLogStateText(sct.logState)}</span>
           </div>
           ` : ''}
           <div class="info-row">
@@ -155,7 +190,7 @@ function displayCertificateData(data) {
       `;
     });
   } else {
-    html += `<div class="no-data">⚠ No SCTs found for this certificate</div>`;
+    html += `<div class="no-data">No SCTs found for this certificate</div>`;
   }
 
   html += `
@@ -167,7 +202,7 @@ function displayCertificateData(data) {
   if (data.certificates && data.certificates.length > 0) {
     html += `
       <div class="info-section">
-        <h2>🔗 Certificate Chain (${data.certificates.length})</h2>
+        <h2>Certificate Chain (${data.certificates.length})</h2>
         <div class="content">
     `;
 
@@ -228,6 +263,19 @@ function showError(message) {
   loadingDiv.classList.add('hidden');
   errorDiv.textContent = message;
   errorDiv.classList.remove('hidden');
+}
+
+/**
+ * Extracts readable log state text from log state object
+ *
+ * @param {object} logState - Log state object
+ * @returns {string} Readable log state text
+ */
+function getLogStateText(logState) {
+  if (logState.readonly) return 'readonly';
+  if (logState.usable) return 'usable';
+  if (logState.retired) return 'retired';
+  return 'unknown';
 }
 
 /**

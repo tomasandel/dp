@@ -43,6 +43,7 @@ browser.webRequest.onHeadersReceived.addListener(
     }
 
     try {
+      const startTime = performance.now();
       console.log(`[SCT Inspector] Processing request for: ${details.url}`);
 
       // Get security information for this request
@@ -71,6 +72,18 @@ browser.webRequest.onHeadersReceived.addListener(
 
       console.log(`[SCT Inspector] Extracted certificate data for ${details.url}`);
       console.log(certData);
+
+      const verifyStartTime = performance.now();
+      const verificationResult = await verifyCertificateSCTs(certData);
+      const verifyEndTime = performance.now();
+      const verificationTimeMs = Math.round(verifyEndTime - verifyStartTime);
+
+      console.log(`[SCT Inspector] Verification: ${verificationResult.verified}/${verificationResult.total} SCTs verified in ${verificationTimeMs}ms`);
+
+      certData.sctVerification = {
+        ...verificationResult,
+        verificationTimeMs
+      };
 
     } catch (error) {
       console.error(`[SCT Inspector] Error processing request:`, error);
@@ -168,6 +181,7 @@ async function fetchCTLogList() {
   return ctLogListPromise;
 }
 
+
 // Convert listing by operators to a flat map by log ID
 function buildLogIdMap(logListData) {
   const map = {};
@@ -187,8 +201,6 @@ function buildLogIdMap(logListData) {
       }
     }
   }
-  console.log("[SCT Inspector] Built CT log ID map");
-  console.log(map);
 
   return map;
 }
@@ -226,7 +238,7 @@ async function injectLogInfo(scts) {
 }
 
 /**
- * Clean up certificate cache when tabs are closed to prevent memory leaks
+ * Clean up certificate cache when tabs are closed
  */
 browser.tabs.onRemoved.addListener((tabId) => {
   certificateCache.delete(tabId);
