@@ -2,11 +2,12 @@
  * SCT Certificate Inspector - Background Script
  *
  * This background script monitors web requests and extracts SCT (Signed Certificate Timestamp)
- * information from TLS certificates. SCTs are part of Certificate Transparency (CT) which
- * helps detect mis-issued certificates.
- *
- * Note: sct-parser.js is loaded first (see manifest.json), so its functions are available here.
- */
+ * information from TLS certificates. It then verifies the SCTs against known CT logs and makes
+ * the results available to the popup UI.
+ * 
+ **/
+
+import { Convert } from 'pvtsutils';
 
 /**
  * Storage for certificate information indexed by tab ID
@@ -202,7 +203,7 @@ function buildLogIdMap(logListData) {
     for (const log of logs) {
       if (log.log_id) {
         // Convert base64 log ID to hex, as used in SCTs
-        const logIdHex = base64ToHex(log.log_id); 
+        const logIdHex = Convert.ToHex(Convert.FromBase64(log.log_id));
         map[logIdHex] = {
           operator: operator.name,
           description: log.description,
@@ -241,21 +242,6 @@ browser.tabs.onRemoved.addListener((tabId) => {
   certificateCache.delete(tabId);
   console.log(`[SCT Inspector] Cleaned up cache for closed tab ${tabId}`);
 });
-
-/**
- * Converts base64 string to hex string
- * @param {string} base64 - Base64 encoded string
- * @returns {string} Hex string
- */
-function base64ToHex(base64) {
-  const binary = atob(base64);
-  let hex = '';
-  for (let i = 0; i < binary.length; i++) {
-    const byte = binary.charCodeAt(i).toString(16).padStart(2, '0');
-    hex += byte;
-  }
-  return hex;
-}
 
 // Initialize
 (async () => {

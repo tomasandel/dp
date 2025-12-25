@@ -30,5 +30,15 @@ module.exports = [
     },
     mode: 'production',
     target: 'web'
+  },
+  // Background script bundle
+  {
+    entry: './src/background/background.js',
+    output: {
+      filename: 'background-bundled.js',
+      path: path.resolve(__dirname, 'dist')
+    },
+    mode: 'production',
+    target: 'web'
   }
 ];

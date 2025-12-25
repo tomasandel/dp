@@ -11,7 +11,7 @@
   ],
 
   "background": {
-    "scripts": ["dist/sct-parser-bundled.js", "dist/ct-verify-bundled.js", "src/background/background.js"]
+    "scripts": ["dist/sct-parser-bundled.js", "dist/ct-verify-bundled.js", "dist/background-bundled.js"]
   },
 
   "browser_action": {
