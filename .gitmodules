@@ -1,0 +1,6 @@
+[submodule "extension"]
+	path = extension
+	url = https://github.com/tomasandel/dp-extension.git
+[submodule "backend"]
+	path = backend
+	url = https://github.com/tomasandel/dp-backend.git
