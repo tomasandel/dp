@@ -4,3 +4,6 @@
 [submodule "backend"]
 	path = backend
 	url = https://github.com/tomasandel/dp-backend.git
+[submodule "monitor"]
+	path = monitor
+	url = https://github.com/tomasandel/dp-monitor.git
